@@ -6,10 +6,10 @@
   "author": "mooware",
   "license": "GPL-3.0",
   "dependencies": {
-    "@wireapp/api-client": ">= 0.6.34",
-    "@wireapp/core": ">= 2.1.53",
-    "@wireapp/store-engine": ">= 0.5.9",
-    "commander": ">= 2.15.1",
-    "dotenv": ">= 5.0.1"
+    "@wireapp/api-client": "=0.6.34",
+    "@wireapp/core": "=2.1.53",
+    "@wireapp/store-engine": "=0.5.9",
+    "commander": "^2.15.1",
+    "dotenv": "^5.0.1"
   }
 }
