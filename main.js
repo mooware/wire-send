@@ -6,9 +6,9 @@ const path = require("path");
 const program = require('commander');
 const pkg = require('./package.json');
 const {Account} = require('@wireapp/core');
-const {FileEngine} = require('@wireapp/store-engine');
-const Config = require("@wireapp/api-client/dist/commonjs/Config");
-const APIClient = require("@wireapp/api-client");
+const {FileEngine} = require('@wireapp/store-engine-fs');
+const {APIClient} = require("@wireapp/api-client");
+const {ClientType, RegisteredClient} = require('@wireapp/api-client/dist/commonjs/client/');
 const {ClientClassification} = require('@wireapp/api-client/dist/commonjs/client/');
 
 require('dotenv').config();
@@ -24,9 +24,9 @@ program
   .parse(process.argv);
 
 var loginData = {
+  clientType: ClientType.PERMANENT,
   email: program.email || process.env.WIRE_LOGIN_EMAIL,
-  password: program.password || process.env.WIRE_LOGIN_PASSWORD,
-  persist: true,
+  password: program.password || process.env.WIRE_LOGIN_PASSWORD
 };
 
 var clientInfo = {
@@ -44,7 +44,7 @@ var storeEngine = new FileEngine(directory);
 storeEngine
   .init('', { fileExtension: '.json' })
   .then(() => {
-    var apiClient = new APIClient(new Config.Config(storeEngine, APIClient.BACKEND.PRODUCTION));
+    var apiClient = new APIClient({store: storeEngine, urls: APIClient.BACKEND.PRODUCTION});
     var account = new Account(apiClient);
 
     account
@@ -59,14 +59,15 @@ storeEngine
               process.exit(0);
             })
             .catch((error) => {
-              console.error(error.message);
+              console.error(error);
               process.exit(1);
             });
         } else if (program.send) {
-          account.service.conversation.sendTextMessage(conversationID, program.send)
+          const payload = account.service.conversation.createText(program.send);
+          account.service.conversation.send(conversationID, payload)
             .then(() => { process.exit(0); })
             .catch((error) => {
-              console.error(error.message);
+              console.error(error);
               process.exit(1);
             });
         } else {
@@ -75,11 +76,11 @@ storeEngine
         }
       })
       .catch((error) => {
-        console.error(error.message);
+        console.error(error);
         process.exit(1);
       });
   })
   .catch((error) => {
-    console.error(error.message);
+    console.error(error);
     process.exit(1);
   });
