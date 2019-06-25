@@ -22,3 +22,5 @@ To list all conversations of an account (e.g. in order to find the conversation 
 To send a message to a conversation:
 
     ./main.js --email <email> --password <password> --conversation <conversation id> --send "my message text"
+
+Note: If the script fails with the error "too many clients" or something similar, it's possible that that there are too many unfinished sessions open. In your Wire client, go to settings -> devices and disconnect any devices that you don't need.
