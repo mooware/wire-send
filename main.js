@@ -23,6 +23,18 @@ program
   .option('-s, --send <message>', 'Send the given message to the conversation')
   .parse(process.argv);
 
+function cleanup(error, account) {
+  if (error) {
+    console.error(error);
+  }
+  if (account) {
+    const exitcode = error ? 1 : 0;
+    account
+      .logout()
+      .then(() => { process.exit(exitcode); });
+  }
+}
+
 var loginData = {
   clientType: ClientType.PERMANENT,
   email: program.email || process.env.WIRE_LOGIN_EMAIL,
@@ -56,31 +68,26 @@ storeEngine
               for (let conv of convlist.conversations) {
                 console.log(conv.id + ": " + conv.name);
               }
-              process.exit(0);
+              cleanup(null, account);
             })
             .catch((error) => {
-              console.error(error);
-              process.exit(1);
+              cleanup(error, account);
             });
         } else if (program.send) {
           const payload = account.service.conversation.createText(program.send);
           account.service.conversation.send(conversationID, payload)
-            .then(() => { process.exit(0); })
+            .then(() => { cleanup(null, account); })
             .catch((error) => {
-              console.error(error);
-              process.exit(1);
+              cleanup(error, account);
             });
         } else {
-          console.error("must specify either --list or --send");
-          process.exit(1);
+          cleanup("must specify either --list or --send", account);
         }
       })
       .catch((error) => {
-        console.error(error);
-        process.exit(1);
+        cleanup(error, null); // login failed, don't pass account
       });
   })
   .catch((error) => {
-    console.error(error);
-    process.exit(1);
+    cleanup(error, account);
   });
